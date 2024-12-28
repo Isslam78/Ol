@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRAZY</title>
+    <style>
+        /* إعدادات الصفحة */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #ffe6f1; /* لون وردي رقيق */
+            color: #b30000; /* لون أحمر رقيق */
+            font-family: 'Georgia', serif;
+            overflow: hidden;
+            text-align: center;
+            margin: 0;
+            position: relative;
+        }
+
+        /* النص */
+        .text {
+            font-size: 3em;
+            animation: fadeIn 2s ease-in-out, bounce 2s infinite;
+            text-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+            padding: 20px;
+            border: 2px solid #ff6699; /* لون وردي مختلف */
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            position: relative;
+            z-index: 10;
+        }
+
+        /* التأثيرات على النص */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-30px);
+            }
+            60% {
+                transform: translateY(-15px);
+            }
+        }
+
+        /* إعدادات الألعاب النارية */
+        #fireworks {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* إعدادات الزر */
+        .next-page-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            font-size: 1.5em;
+            background-color: #ff6699; /* لون وردي مميز */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease;
+        }
+
+        .next-page-btn:hover {
+            background-color: #ff3366;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="fireworks"></div> <!-- عنصر الألعاب النارية -->
+    <div class="text">This website is dedicated to expressing our gratitude to you for all your hard work and dedication. Your support and encouragement mean so much to us. Thank you for being an amazing teacher ❤️</div> <!-- النص المتحرك -->
+
+    <!-- زر الانتقال إلى الصفحة الأخرى -->
+    
+    <button class="next-page-btn" onclick="window.location.href='surprise.html'">انتقل إلى الصفحة الأخرى</button>
+     
+
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    //#########
+    
+//#######
+        function navigateToPage(page) {
+            window.location.href = page;
+        }
+        $(document).ready(function () {
+            var SCREEN_WIDTH = window.innerWidth,
+                SCREEN_HEIGHT = window.innerHeight,
+                mousePos = { x: 400, y: 300 },
+                canvas = document.createElement('canvas'),
+                context = canvas.getContext('2d'),
+                particles = [],
+                rockets = [],
+                MAX_PARTICLES = 300,
+                colorCode = 0;
+
+            // إضافة الـ canvas إلى صفحة الألعاب النارية
+            document.getElementById('fireworks').appendChild(canvas);
+            canvas.width = SCREEN_WIDTH;
+            canvas.height = SCREEN_HEIGHT;
+            setInterval(launch, 800); // إطلاق الألعاب النارية كل 800ms
+            setInterval(loop, 1000 / 50); // التحديث كل 1/50 من الثانية
+
+            // تحديث موقع الماوس
+            $(document).mousemove(function (e) {
+                e.preventDefault();
+                mousePos = { x: e.clientX, y: e.clientY };
+            });
+
+            // إطلاق الألعاب النارية عند النقر
+            $(document).mousedown(function (e) {
+                for (var i = 0; i < 5; i++) {
+                    launchFrom(Math.random() * SCREEN_WIDTH * 2 / 3 + SCREEN_WIDTH / 6);
+                }
+            });
+
+            // وظيفة الإطلاق
+            function launch() {
+                launchFrom(mousePos.x);
+            }
+
+            // إطلاق الصواريخ من الموقع المحدد
+            function launchFrom(x) {
+                if (rockets.length < 10) {
+                    var rocket = new Rocket(x);
+                    rocket.explosionColor = Math.floor(Math.random() * 360 / 10) * 10;
+                    rocket.vel.y = Math.random() * -3 - 4;
+                    rocket.vel.x = Math.random() * 6 - 3;
+                    rocket.size = 8;
+                    rocket.shrink = 0.999;
+                    rocket.gravity = 0.01;
+                    rockets.push(rocket);
+                }
+            }
+
+            // الحلقة الرئيسية لتحديث الرسومات
+            function loop() {
+                // تحديث حجم الشاشة إذا تم تغييرها
+                if (SCREEN_WIDTH != window.innerWidth) {
+                    canvas.width = SCREEN_WIDTH = window.innerWidth;
+                }
+                if (SCREEN_HEIGHT != window.innerHeight) {
+                    canvas.height = SCREEN_HEIGHT = window.innerHeight;
+                }
+
+                // مسح الـ canvas
+                context.fillStyle = "rgba(255, 230, 230, 0.05)";
+                context.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+                var existingRockets = [];
+                for (var i = 0; i < rockets.length; i++) {
+                    rockets[i].update();
+                    rockets[i].render(context);
+                    var distance = Math.sqrt(Math.pow(mousePos.x - rockets[i].pos.x, 2) + Math.pow(mousePos.y - rockets[i].pos.y, 2));
+                    var randomChance = rockets[i].pos.y < (SCREEN_HEIGHT * 2 / 3) ? (Math.random() * 100 <= 1) : false;
+
+                    // قواعد الانفجار
+                    if (rockets[i].pos.y < SCREEN_HEIGHT / 5 && rockets[i].vel.y >= 0 && distance < 50 || randomChance) {
+                        rockets[i].explode();
+                    } else {
+                        existingRockets.push(rockets[i]);
+                    }
+                }
+
+                rockets = existingRockets;
+
+                var existingParticles = [];
+                for (var i = 0; i < particles.length; i++) {
+                    particles[i].update();
+                    if (particles[i].exists()) {
+                        particles[i].render(context);
+                        existingParticles.push(particles[i]);
+                    }
+                }
+
+                particles = existingParticles;
+
+                while (particles.length > MAX_PARTICLES) {
+                    particles.shift();
+                }
+            }
+
+            // تعريف الجسيمات (Particles)
+            function Particle(pos) {
+                this.pos = { x: pos ? pos.x : 0, y: pos ? pos.y : 0 };
+                this.vel = { x: 0, y: 0 };
+                this.shrink = .97;
+                this.size = 2;
+                this.resistance = 1;
+                this.gravity = 0;
+                this.flick = false;
+                this.alpha = 1;
+                this.fade = 0;
+                this.color = 0;
+            }
+
+            Particle.prototype.update = function () {
+                this.vel.x *= this.resistance;
+                this.vel.y *= this.resistance;
+                this.vel.y += this.gravity;
+                this.pos.x += this.vel.x;
+                this.pos.y += this.vel.y;
+                this.size *= this.shrink;
+                this.alpha -= this.fade;
+            };
+
+            Particle.prototype.render = function (c) {
+                if (!this.exists()) return;
+
+                c.save();
+                c.globalCompositeOperation = 'lighter';
+                var x = this.pos.x,
+                    y = this.pos.y,
+                    r = this.size / 2;
+
+                var gradient = c.createRadialGradient(x, y, 0.1, x, y, r);
+                gradient.addColorStop(0.1, "rgba(255,255,255," + this.alpha + ")");
+                gradient.addColorStop(0.8, "hsla(" + this.color + ", 100%, 50%, " + this.alpha + ")");
+                gradient.addColorStop(1, "hsla(" + this.color + ", 100%, 50%, 0.1)");
+
+                c.fillStyle = gradient;
+                c.beginPath();
+                c.arc(this.pos.x, this.pos.y, this.flick ? Math.random() * this.size : this.size, 0, Math.PI * 2, true);
+                c.closePath();
+                c.fill();
+                c.restore();
+            };
+
+            Particle.prototype.exists = function () {
+                return this.alpha >= 0.1 && this.size >= 1;
+            };
+
+            // تعريف الصواريخ (Rockets)
+            function Rocket(x) {
+                Particle.apply(this, [{ x: x, y: SCREEN_HEIGHT }]);
+                this.explosionColor = 0;
+            }
+
+            Rocket.prototype = new Particle();
+            Rocket.prototype.constructor = Rocket;
+
+            Rocket.prototype.explode = function () {
+                var count = Math.random() * 10 + 80;
+                for (var i = 0; i < count; i++) {
+                    var particle = new Particle(this.pos);
+                    var angle = Math.random() * Math.PI * 2;
+                    var speed = Math.cos(Math.random() * Math.PI / 2) * 15;
+                    particle.vel.x = Math.cos(angle) * speed;
+                    particle.vel.y = Math.sin(angle) * speed;
+                    particle.size = 10;
+                    particle.gravity = 0.2;
+                    particle.resistance = 0.92;
+                    particle.shrink = Math.random() * 0.05 + 0.93;
+                    particle.flick = true;
+                    particle.color = this.explosionColor;
+                    particles.push(particle);
+                }
+            };
+
+            Rocket.prototype.render = function (c) {
+                if (!this.exists()) return;
+
+                c.save();
+                c.globalCompositeOperation = 'lighter';
+                var x = this.pos.x,
+                    y = this.pos.y,
+                    r = this.size / 2;
+
+                var gradient = c.createRadialGradient(x, y, 0.1, x, y, r);
+                gradient.addColorStop(0.1, "rgba(255, 255, 255 ," + this.alpha + ")");
+                gradient.addColorStop(1, "rgba(0, 0, 0, " + this.alpha + ")");
+                c.fillStyle = gradient;
+
+                c.beginPath();
+                c.arc(this.pos.x, this.pos.y, this.flick ? Math.random() * this.size / 2 + this.size / 2 : this.size, 0, Math.PI * 2, true);
+                c.closePath();
+                c.fill();
+                c.restore();
+            };
+
+        });
+    </script>
+</body>
+
+</html>
